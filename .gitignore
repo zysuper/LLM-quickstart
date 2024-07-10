@@ -167,3 +167,6 @@ peft/temp/
 deepspeed/output_dir
 RLHF
 .conda/
+
+
+/homework/*/models
