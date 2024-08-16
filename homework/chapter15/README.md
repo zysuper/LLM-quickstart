@@ -8,6 +8,31 @@ deepspeed --num_gpus=1 translation/run_translation.py \
 --output_dir output_dir --overwrite_output_dir --max_train_samples 500 --num_train_epochs 1 \
 --dataset_name wmt16 --dataset_config "ro-en" --source_lang en --target_lang ro --fp16
 
+1. 将 "offload_optimizer": "pin_memory" 设置为 **false**,可以改善 `optimizer state initialized` 完成的时间。当为 `true` 时，会在最后 93% 的时候卡成 ppt.
+改过之后能继续了：
+```
+[2024-08-16 19:15:25,240] [INFO] [utils.py:782:see_memory_usage] MA 0.0 GB         Max_MA 0.0 GB         CA 0.06 GB         Max_CA 0 GB 
+[2024-08-16 19:15:25,240] [INFO] [utils.py:789:see_memory_usage] CPU Virtual Memory:  used = 26.23 GB, percent = 83.8%
+[2024-08-16 19:15:50,709] [INFO] [utils.py:781:see_memory_usage] After initializing optimizer states
+[2024-08-16 19:15:50,727] [INFO] [utils.py:782:see_memory_usage] MA 0.0 GB         Max_MA 0.0 GB         CA 0.06 GB         Max_CA 0 GB 
+[2024-08-16 19:15:50,728] [INFO] [utils.py:789:see_memory_usage] CPU Virtual Memory:  used = 28.95 GB, percent = 92.5%
+[2024-08-16 19:15:50,773] [INFO] [stage3.py:485:_setup_for_real_optimizer] optimizer state initialized
+```
+
+1. 如果不增大 `stage3_max_live_parameters`，`stage3_max_reuse_distance`，会发现显存占用率很低。
+
+![](./imgs/1.png)
+
+将 `"stage3_max_live_parameters": 4e9,"stage3_max_reuse_distance": 4e9` 增大后，显存利用率上来了：
+
+![](./imgs/2.png)
+
+3. 还能可以手动设置 reduce_bucket_size 来继续增大显存是使用。
+
+![](./imgs/3.png)
+
+改了上述参数，能继续训练了，但是训练时间有点长。感觉并不是显存用的越多，训练越快。我机器的瓶颈好像在 cpu 上了。
+
 # DeepSpeed 框架安装指南
 
 ## 更新 GCC 和 G++ 版本（如需）
