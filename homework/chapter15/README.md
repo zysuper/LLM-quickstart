@@ -19,15 +19,15 @@ deepspeed --num_gpus=1 translation/run_translation.py \
 [2024-08-16 19:15:50,773] [INFO] [stage3.py:485:_setup_for_real_optimizer] optimizer state initialized
 ```
 
-1. 如果不增大 `stage3_max_live_parameters`，`stage3_max_reuse_distance`，会发现显存占用率很低。
+1. 如果不增大 `stage3_max_live_parameters`，会发现显存占用率很低。
 
 ![](./imgs/1.png)
 
-将 `"stage3_max_live_parameters": 4e9,"stage3_max_reuse_distance": 4e9` 增大后，显存利用率上来了：
+将 `"stage3_max_live_parameters": 4e9, 增大后，显存利用率上来了：
 
 ![](./imgs/2.png)
 
-3. 还能可以手动设置 reduce_bucket_size 来继续增大显存是使用。
+1. 还能可以手动设置 reduce_bucket_size 来继续增大显存是使用。
 
 ![](./imgs/3.png)
 
